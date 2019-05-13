@@ -1,0 +1,9 @@
+@font-face{
+  font-family: 'myPingFangMedium';
+  src: url(./PingFangMedium.ttf);
+}
+
+@font-face{
+  font-family: 'myConsola';
+  src: url(./consola.ttf);
+}
