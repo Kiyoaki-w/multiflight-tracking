@@ -12,7 +12,7 @@ import XYZ from 'ol/source/XYZ';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
 
-let myMap;
+let map;
 let myView;
 let wmtsLayer, googleTerLayer;
 
@@ -29,7 +29,6 @@ export default {
       var baseUrl = basemap_link + '/geoserver/gwc/service/wmts';
       var style = '';
       var format = 'image/png';
-      var infoFormat = 'text/html';
       var layerName = 'China:world-dark'; //var layerName = 'China:t_world';
       var projection = new proj_Projection({
           code: 'EPSG:900913',
@@ -73,6 +72,18 @@ export default {
       });
       return source;
     },
+
+    switchMap(str) {
+      let layersArray = map.getLayers();
+      if (str === 'darkMap') {
+        map.removeLayer(googleTerLayer);
+        layersArray.insertAt(1, wmtsLayer);
+      }
+      else if (str === 'googleMap') {
+        map.removeLayer(wmtsLayer);
+        layersArray.insertAt(1, googleTerLayer);
+      }
+    },
   },
 
   mounted() {
@@ -94,19 +105,19 @@ export default {
     myView = new View({
       extent: Projection.get('EPSG:3857').getExtent(),
       center: Projection.fromLonLat([116.35,39.9]),
-      zoom: 4,
+      zoom: 10,
       minZoom:2,
     });
 
-    myMap = new Map({
+    map = new Map({
       target: 'map',
       loadTilesWhileAnimating: true, //允许在动画中加载瓦片
-      layers: [
-        // googleTerLayer, 
-        wmtsLayer,
-      ],
+      layers: [],
       view: myView
     });
+    let layersArray = map.getLayers();
+    layersArray.insertAt(1, wmtsLayer);
+
   },
 }
 </script>

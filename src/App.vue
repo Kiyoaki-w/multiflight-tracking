@@ -1,19 +1,30 @@
 <template>
   <div id="app">
     <div class="main">
-      <mapView style="background-color: #061922"/>
+      <mapView ref="mapView" style="background-color: #061922"/>
     </div>
 
-    <a-row type="flex" justify="space-between" style="padding-top:15px; padding-right:15px; padding-left:20px">
-      <a-popover trigger="click" title="Title" placement="bottomRight">
+    <a-row type="flex" justify="space-between" style="padding-top:15px; padding-left:20px; ">
+      <a-popover trigger="click" title="设置" placement="bottomRight">
         <div class="myCard" style="width:40px; height:40px;">
-          <div style="font-size:19px;margin:auto;display:flex"> 
+          <div style="font-size:18px;margin:auto;display:flex"> 
             <font-awesome-icon style="vertical-align:middle" icon="layer-group" /> 
           </div>
         </div>
+        
         <template slot="content">
-          <p>Content</p>
-          <p>Content</p>
+          <div class="subTitle" style="margin-top: -13px;">
+            <p>底图选择</p>
+          </div>
+          <a-radio-group @change="mapChange" v-model="selectedMap">
+            <a-radio :value="1">暗色底图</a-radio>
+            <a-radio :value="2">Google地图</a-radio>
+          </a-radio-group>
+
+          <div class="subTitle">
+            <p>底图选择</p>
+          </div>
+          
         </template>
       </a-popover>
       
@@ -29,13 +40,29 @@ export default {
   name: 'app',
   components: {
     mapView
+  },
+  data () {
+    return {
+      radioStyle: {
+        // display: 'block',
+        // height: '24px',
+        // lineHeight: '24px',
+      },
+      selectedMap: 1
+    }
+  },
+  methods: {
+    mapChange (event){
+      let str = (event.target.value === 1 ? 'darkMap' : 'googleMap');
+      this.$refs.mapView.switchMap(str);
+    }
   }
 }
 </script>
 
 <style>
 #app {
-  font-family: myPingFangMedium, myConsola;
+  font-family: Microsoft YaHei, myPingFangMedium, myConsola;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
@@ -56,6 +83,7 @@ export default {
   border-radius: 2px;
   min-width: 0;
   position: relative;
+  font-weight: bold;
   text-decoration: none;
   -webkit-box-shadow: 0px 3px 2px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 4px 0px rgba(0,0,0,0.12);
           box-shadow: 0px 3px 2px -1px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 4px 0px rgba(0,0,0,0.12);
@@ -71,5 +99,21 @@ export default {
   transition-property: box-shadow, -webkit-box-shadow;
   -webkit-box-shadow: 0px 4px 2px -2px rgba(0,0,0,0.2), 0px 2px 2px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12);
           box-shadow: 0px 4px 2px -2px rgba(0,0,0,0.2), 0px 2px 2px 1px rgba(0,0,0,0.14), 0px 3px 14px 2px rgba(0,0,0,0.12);
+}
+.subTitle {
+  margin-left: -8px;
+  padding-top: 7px;
+  font-size: 12px;
+  margin-bottom: -10px;
+  color: #000000;
+  font-weight: lighter
+}
+/* .ant-popover-inner-content{
+  zoom: 0.95;
+  -ms-zoom: 0.95;
+  user-zoom: 0.95
+} */
+.ant-radio-wrapper{
+  color: rgba(0,0,0,1);
 }
 </style>
