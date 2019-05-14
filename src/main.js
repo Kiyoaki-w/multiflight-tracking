@@ -1,13 +1,20 @@
 import Vue from "vue";
-// import Button from "ant-design-vue/lib/button";
-import Antd from 'ant-design-vue';
-import "ant-design-vue/dist/antd.css";
 import App from "./App";
 
+// ant-design
+import Antd from 'ant-design-vue';
+import "ant-design-vue/dist/antd.css";
 Vue.use(Antd);
-// Vue.component(Button.name, Button);
 
-import './assets/fonts/loadMyFonts.css'; // 读取字体文件
+// font-awesome
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faLayerGroup } from '@fortawesome/free-solid-svg-icons';
+import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
+library.add(faLayerGroup);
+Vue.component('font-awesome-icon', FontAwesomeIcon);
+
+// 读取字体文件
+import './assets/fonts/loadMyFonts.css';
 
 Vue.config.productionTip = false;
 

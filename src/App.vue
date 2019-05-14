@@ -7,7 +7,9 @@
     <a-row type="flex" justify="space-between" style="padding-top:15px; padding-right:15px; padding-left:20px">
       <a-popover trigger="click" title="Title" placement="bottomRight">
         <div class="myCard" style="width:40px; height:40px;">
-          <a-icon style="vertical-align:middle" type="setting" />
+          <div style="font-size:19px;margin:auto;display:flex"> 
+            <font-awesome-icon style="vertical-align:middle" icon="layer-group" /> 
+          </div>
         </div>
         <template slot="content">
           <p>Content</p>
@@ -16,21 +18,16 @@
       </a-popover>
       
     </a-row>
-
     
-    
-    <!-- <HelloWorld msg="Welcome to Your Vue.js App"/> -->
   </div>
 </template>
 
 <script>
-// import HelloWorld from './components/HelloWorld.vue'
 import mapView from './components/mapView.vue'
 
 export default {
   name: 'app',
   components: {
-    // HelloWorld
     mapView
   }
 }
@@ -43,7 +40,6 @@ export default {
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  /* background-color: #2c3e50 */
 }
 .main {
   position: absolute; 
@@ -53,11 +49,10 @@ export default {
   vertical-align: middle;
 }
 .myCard {
+  display: flex;
   background-color: white;
-  font-size: 24px;
   text-align: center;
   vertical-align: middle;
-  /* display: block; */
   border-radius: 2px;
   min-width: 0;
   position: relative;
@@ -67,6 +62,7 @@ export default {
 }
 .myCard:hover {
   cursor: pointer;
+  background-color: rgb(240, 240, 240);
   -webkit-transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
   -webkit-transition-property: -webkit-box-shadow;
