@@ -35,7 +35,7 @@ import LineString from 'ol/geom/LineString';
  */
 const init_traceStyles = (number = 10) => {
   let styles = [];
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 30; i++) {
     // 随机RGB颜色
     let rr = Math.floor(Math.random()*256);
     let bb = Math.floor(Math.random()*256);

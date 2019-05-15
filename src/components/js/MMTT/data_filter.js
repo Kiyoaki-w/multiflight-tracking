@@ -12,7 +12,7 @@
   }
 
   // 数据过滤
-  this.filterData = (data, number = 10, returnInPoint = true) => {
+  this.filterData = (data, number = 30, returnInPoint = true) => {
     let filtered = [];
 
     // 对第一批数据，生成白名单
