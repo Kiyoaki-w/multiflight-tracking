@@ -3,7 +3,7 @@
  */
 
 
-module.exports = function (data) {
+ function filter0() {
 
   // 初始化
   this.init = () => {
@@ -12,7 +12,7 @@ module.exports = function (data) {
   }
 
   // 数据过滤
-  this.filterData = (data, number = 20, returnInPoint = true) => {
+  this.filterData = (data, number = 10, returnInPoint = true) => {
     let filtered = [];
 
     // 对第一批数据，生成白名单
@@ -56,3 +56,6 @@ const setWhiteList = (planes, number = 7, center = [116.64, 39.9] /* [lon,lat] *
   }
   return whiteList;
 }
+
+
+export let dataFilter = new filter0();

@@ -3,7 +3,7 @@
  */
 
 
-module.exports = function (data) {
+function MMTT0() {
 
   this.initFlag = true; // 标识是否为第一批数据
   this.traces = []; // 当前可靠航迹
@@ -126,3 +126,5 @@ const getPredictPoint = (trace) => {
   predicPoint.push(point2[2] + dheight);
   return predicPoint;
 }
+
+export let MMTT = new MMTT0();
