@@ -11,7 +11,7 @@ module.exports = function (data) {
 
   this.traceNumber = 0; // 已生成的航迹数量
 
-  this.startGate = {
+  this.gate = {
     lon: 0.03,
     lat: 0.03,
     height: 1000
@@ -26,35 +26,73 @@ module.exports = function (data) {
     else{
       for (let i in data) {
         let newPoint = data[i];
+        let pointUsed = false;
+
         // 点迹-航迹关联
-
-        // 航迹消亡
-
-        // 航迹补点
-
-        // 航迹起始
-        for (let j in this.tempPoints) {
-          if (this.tempPoints[j]) {
-            let oldPoint = this.tempPoints[j];
-            let dlon = Math.abs(newPoint[0] - oldPoint[0]);
-            let dlat = Math.abs(newPoint[1] - oldPoint[1]);
-            let dheight = Math.abs(newPoint[2] - oldPoint[2]);
-            if (dlon < this.startGate.lon && dlat < this.startGate.lat && dheight < this.startGate.height) {
-              // 均小于门限，起始成功
-              this.traces.push(newTrace(oldPoint, newPoint, this.traceNumber)); // 将新轨迹存入
-              this.traceNumber += 1;
-              delete this.tempPoints[i];
+        // todo: 其他关联方法 如：CA、自适应
+        if (!pointUsed && this.traces.length > 0) {
+          for (let i in this.traces) {
+            let trace = this.traces[i];
+            let predictPoint = getPredictPoint(trace);
+            let dlon = Math.abs(newPoint[0] - predictPoint[0]);
+            let dlat = Math.abs(newPoint[1] - predictPoint[1]);
+            let dheight = Math.abs(newPoint[2] - predictPoint[2]);
+            if (dlon < this.gate.lon && dlat < this.gate.lat && dheight < this.gate.height) {
+              // 均小于门限，匹配成功
+              this.traces[i].points.push(newPoint); // 存入新点迹
+              this.traces[i].notFreshed = 0;
+              pointUsed = true;
               break;
-            }
-            else {
-              // 起始失败
-              this.tempPoints.push(newPoint); // 暂存
             }
           }
         }
 
 
+        // 航迹起始
+        if (!pointUsed) {
+          for (let j in this.tempPoints) {
+            if (this.tempPoints[j]) {
+              let oldPoint = this.tempPoints[j];
+              let dlon = Math.abs(newPoint[0] - oldPoint[0]);
+              let dlat = Math.abs(newPoint[1] - oldPoint[1]);
+              let dheight = Math.abs(newPoint[2] - oldPoint[2]);
+              if (dlon < this.gate.lon && dlat < this.gate.lat && dheight < this.gate.height) {
+                // 均小于门限，起始成功
+                this.traces.push(newTrace(oldPoint, newPoint, this.traceNumber)); // 将新轨迹存入
+                this.traceNumber += 1;
+                delete this.tempPoints[i];
+                pointUsed = true;
+                break;
+              }
+            }
+          }
+        }
 
+        // 关联失败且起始失败的，暂存
+        if (!pointUsed) {
+          this.tempPoints.push(newPoint);
+        }
+
+      }
+
+      // 对未被更新的航迹，消亡或补点
+      for (let i in this.traces) {
+        let trace = this.traces[i];
+        if (trace.notFreshed === 0) {
+          // 刚刚经历过更新的
+          console.log(`==============更新！${this.traces[i]}`);
+        }
+        else if (trace.notFreshed > 4) {
+          // 超过N次未被更新的，消亡
+          console.log(`==============消亡！${this.traces[i]}`);
+          delete this.traces[i];
+        }
+        else if (trace.notFreshed > 0 && trace.notFreshed < 5) {
+          // 未被更新，补点
+          this.traces[i].points.push(getPredictPoint(this.traces[i]));
+          console.log(`==============补点！${this.traces[i]}`);
+          this.traces[i].notFreshed += 1;
+        }
       }
       
     }
@@ -63,13 +101,6 @@ module.exports = function (data) {
   }
 
 
-
-
-
-
-
-
-  
 }
 
 
@@ -77,5 +108,21 @@ const newTrace = (point1, point2, traceNumber) => {
   let trace = {};
   trace.points = [point1, point2];
   trace.idx = traceNumber + 1;
+  trace.notFreshed = 0;
   return trace;
+};
+
+// 根据航迹当前信息预测下一点位置
+const getPredictPoint = (trace) => {
+  let len = trace.points.length;
+  let point1 = trace.points[len - 2];
+  let point2 = trace.points[len - 1];
+  let predicPoint = [];
+  let dlon = point2[0] - point1[0];
+  let dlat = point2[1] - point1[1];
+  let dheight = point2[2] - point1[2];
+  predicPoint.push(point2[0] + dlon);
+  predicPoint.push(point2[1] + dlat);
+  predicPoint.push(point2[2] + dheight);
+  return predicPoint;
 }

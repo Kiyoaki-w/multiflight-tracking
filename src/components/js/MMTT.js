@@ -11,16 +11,19 @@ dataFilter.init();
 const myMMTT = require('./MMTT/MMTT');
 const MMTT = new myMMTT();
 
-for (let i = 0; i < 2; i++) {
+for (let i = 0; i < 60; i++) {
   let data_raw = datas[i];
   let data = dataFilter.filterData(data_raw);
   MMTT.handleData(data, (traces, tempPoints, traceNumber) => {
     console.log(`=============== 循环次数${i} ===============`);
-    console.log('trace:');
-    console.log(traces);
-    console.log('temp points:');
-    console.log(tempPoints);
-    console.log('\n');
+    // console.log('trace:');
+    // console.log(traces);
+    // for (let i in traces) {
+    //   console.log(traces[i].points);
+    // }
+    // console.log('temp points:');
+    // console.log(tempPoints);
+    // console.log('\n');
     
   })
 }

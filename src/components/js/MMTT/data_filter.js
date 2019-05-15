@@ -12,7 +12,7 @@ module.exports = function (data) {
   }
 
   // 数据过滤
-  this.filterData = (data, number = 7, returnInPoint = true) => {
+  this.filterData = (data, number = 20, returnInPoint = true) => {
     let filtered = [];
 
     // 对第一批数据，生成白名单
