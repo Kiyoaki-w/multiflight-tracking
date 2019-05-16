@@ -1,11 +1,13 @@
 <template>
   <div id="app">
     <div class="main">
-      <mapView ref="mapView" style="background-color: #061922"/>
+      <mapView ref="mapView" style="background-color: #061922"
+        @drawFinish='drawing = false'
+      />
     </div>
 
     <a-row type="flex" justify="space-between" style="padding-top:15px; padding-left:20px; ">
-      <a-popover trigger="click" title="设置" placement="bottomRight">
+      <a-popover trigger="click" title="设置" placement="bottomRight" style="max-width:240px">
         <div class="myCard" style="width:40px; height:40px;">
           <div style="font-size:18px;margin:auto;display:flex"> 
             <font-awesome-icon style="vertical-align:middle" icon="layer-group" /> 
@@ -21,8 +23,26 @@
             <a-radio :value="2">Google地图</a-radio>
           </a-radio-group>
 
+
+
           <div class="subTitle">
-            <p>底图选择</p>
+            <p>数据演示</p>
+          </div>
+          <a-radio-group v-model="show.mode">
+            <a-radio :value="1">历史数据</a-radio>
+            <a-radio :value="2">实时数据</a-radio>
+          </a-radio-group>
+          <div style="padding-top:5px">
+            <span>历史长度：<a-input-number :disabled="show.mode === 2" size='small' :step='20' :min="30" :max="180" v-model="show.hisLength"/> 秒</span>
+            <br>
+            <span>刷新速度：<a-input-number :disabled="show.mode === 2" size='small' :step='100' :min="200" :max="2000" v-model="show.freq"/> 毫秒</span>
+            <br>
+            <span>飞机数量：<a-input-number :disabled="show.mode === 2" size='small' :min="1" :max="40" v-model="show.planeNumber"/> 架</span>
+          </div>
+          <div style="padding-top:15px; text-align:end;">
+            <a-button :disabled="drawing" size="small" type="primary" icon="caret-right" @click="MMTTshow">开始</a-button>
+            <span style="padding:5px"> </span>
+            <a-button :disabled="drawing" size="small" type="default" icon="delete" @click="MMTTclear">清除</a-button>
           </div>
           
         </template>
@@ -43,19 +63,29 @@ export default {
   },
   data () {
     return {
-      radioStyle: {
-        // display: 'block',
-        // height: '24px',
-        // lineHeight: '24px',
+      selectedMap: 1, // 底图风格
+      show: {
+        mode: 1,
+        hisLength: 180,
+        freq: 200,
+        planeNumber: 20
       },
-      selectedMap: 1
+      loading: false,
+      drawing: false,
     }
   },
   methods: {
     mapChange (event){
       let str = (event.target.value === 1 ? 'darkMap' : 'googleMap');
       this.$refs.mapView.switchMap(str);
-    }
+    },
+    MMTTshow() {
+      this.$refs.mapView.MMTTshow(this.show);
+      this.drawing = true;
+    },
+    MMTTclear() {
+      this.$refs.mapView.MMTTclear();
+    },
   }
 }
 </script>

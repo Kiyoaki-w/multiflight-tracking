@@ -34,4 +34,4 @@ const record = (url, period = 60, freq = 1, path = './data.json') => {
   }, 1000);
 }
 
-record('http://219.224.161.159:28080/data.json')
+record('http://219.224.161.159:28080/data.json', 180)

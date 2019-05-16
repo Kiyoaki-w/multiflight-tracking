@@ -9,6 +9,7 @@ const exampleDatas = require('./js/data.json'); // 示例数据
 import {dataFilter} from './js/MMTT/data_filter.js';
 dataFilter.init();
 import {MMTT} from './js/MMTT/MMTT.js';
+MMTT.init();
 
 
 /*========================== 按需引入ol组件 ==========================*/
@@ -24,7 +25,7 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import {Circle as CircleStyle, Fill, Stroke, Style, Text} from 'ol/style.js';
 import Feature from 'ol/Feature.js';
 import Point from 'ol/geom/Point.js';
-import { request } from 'http';
+// import { request } from 'http';
 import LineString from 'ol/geom/LineString';
 
 
@@ -33,14 +34,14 @@ import LineString from 'ol/geom/LineString';
 /**
  * 初始化随机轨迹颜色样式
  */
-const init_traceStyles = (number = 10) => {
+const init_traceStyles = (number = 40) => {
   let styles = [];
-  for (let i = 0; i < 30; i++) {
+  for (let i = 0; i < number; i++) {
     // 随机RGB颜色
     let rr = Math.floor(Math.random()*256);
     let bb = Math.floor(Math.random()*256);
     let gg = Math.floor(Math.random()*256);
-    let alpha = 0.5;
+    let alpha = 1;
     let style = [
       new Style({
         stroke: new Stroke({
@@ -49,7 +50,6 @@ const init_traceStyles = (number = 10) => {
         })
       })
     ];
-    console.log([rr, gg, bb, alpha])
     styles.push(style);
   }
   return styles;
@@ -139,7 +139,18 @@ const drawTrace = (trace) => {
     geometry: geometry
   });
   feature.setStyle(traceStyle);
+  // 若有同ID的，是同一航迹的上次渲染，删除
+  let feature_old = traceSource.getFeatureById(trace.idx);
+  if (feature_old) {
+    traceSource.removeFeature(feature_old);
+  }
+  feature.setId(trace.idx);
   traceSource.addFeature(feature);
+};
+
+const removeTrace = (idx) => {
+  let feature = traceSource.getFeatureById(idx);
+  traceSource.removeFeature(feature);
 };
 
 const drawPoint = (point) => {
@@ -181,23 +192,55 @@ export default {
       }
     },
 
-    // 点迹与航迹渲染
-    startMMTT() {
-      for (let i = 0; i < 60; i++) {
-        let data_raw = exampleDatas[i];
-        let data = dataFilter.filterData(data_raw);
-        MMTT.handleData(data, (traces, tempPoints, traceNumber) => {
-          for (let i in traces) {
-            let trace = traces[i];
-            drawTrace(trace);
-          }
-        });
+    // 响应父组件的开始演示指令
+    MMTTshow(config) {
+      if (config.mode === 2) {
+        // 实时数据渲染
       }
-    }
+      if (config.mode === 1) {
+        // 历史数据模拟渲染
+        this.simulateMMTT(config.freq, config.hisLength, config.planeNumber);
+      }
+    },
+
+    // 清除数据，初始化
+    MMTTclear() {
+      traceSource.clear();
+      MMTT.init();
+    },
+
+    // 点迹与航迹模拟渲染
+    simulateMMTT(freq = 400, hisLength = 120, planeNumber = 15) {
+      let i = 0;
+      let timer = setInterval(()=>{
+        if (i < hisLength) {
+          let data_raw = exampleDatas[i];
+          let data = dataFilter.filterData(data_raw, planeNumber);
+          MMTT.handleData(data, (cmd, traces, tempPoints, traceNumber, idxToDie) => {
+            if (cmd === 'die') {
+              removeTrace(idxToDie);
+            }
+            if (cmd === 'draw') {
+              for (let i in traces) {
+                let trace = traces[i];
+                drawTrace(trace, i);
+              }
+            }
+          });
+          i++;
+        }
+        else{
+          clearInterval(timer); // 终止timer
+          this.$emit('drawFinish');
+        }
+      }, freq)
+    },
+
+    
   },
 
   mounted() {
-    const __this = this;
+    // const __this = this;
 
     wmtsLayer = new TileLayer({
       title: "WMTS",
@@ -229,8 +272,8 @@ export default {
     layersArray.insertAt(1, wmtsLayer);
     layersArray.insertAt(4, traceLayer);
 
-    drawPoint([116.4,39.9]);
-    this.startMMTT()
+    // drawPoint([116.4,39.9]);
+    // this.simulateMMTT()
   },
 }
 </script>
