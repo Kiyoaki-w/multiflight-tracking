@@ -37,7 +37,7 @@
             <br>
             <span>刷新速度：<a-input-number :disabled="show.mode === 2" size='small' :step='100' :min="200" :max="2000" v-model="show.freq"/> 毫秒</span>
             <br>
-            <span>飞机数量：<a-input-number :disabled="show.mode === 2" size='small' :min="1" :max="40" v-model="show.planeNumber"/> 架</span>
+            <span>飞机数量：<a-input-number size='small' :min="1" :max="40" v-model="show.planeNumber"/> 架</span>
           </div>
           <div style="padding-top:15px; text-align:end;">
             <a-button :disabled="drawing" size="small" type="primary" icon="caret-right" @click="MMTTshow">开始</a-button>

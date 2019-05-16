@@ -38,7 +38,7 @@
 }
 
 
-const setWhiteList = (planes, number = 7, center = [116.64, 39.9] /* [lon,lat] */) => {
+const setWhiteList = (planes, number, center = [116.64, 39.9] /* [lon,lat] */) => {
   let whiteList = {}; // 用hex标识的白名单
   let whiteListLength = 0;
   for (let i in planes) {

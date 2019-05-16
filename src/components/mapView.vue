@@ -25,8 +25,9 @@ import WMTSTileGrid from 'ol/tilegrid/WMTS';
 import {Circle as CircleStyle, Fill, Stroke, Style, Text} from 'ol/style.js';
 import Feature from 'ol/Feature.js';
 import Point from 'ol/geom/Point.js';
-// import { request } from 'http';
+import { request } from 'http';
 import LineString from 'ol/geom/LineString';
+import axios from 'axios'
 
 
 /*========================== 一些初始化相关函数 ==========================*/
@@ -125,6 +126,8 @@ let traceLayer = new VectorLayer({
 });
 let traceStyles = init_traceStyles();
 
+let feedTimer;
+
 /*========================== 航迹显示相关 ==========================*/
 const drawTrace = (trace) => {
   let points = trace.points;
@@ -196,6 +199,7 @@ export default {
     MMTTshow(config) {
       if (config.mode === 2) {
         // 实时数据渲染
+        this.rtimeMMTT('http://219.224.161.159:28080/data.json', 1000, config.planeNumber);
       }
       if (config.mode === 1) {
         // 历史数据模拟渲染
@@ -207,12 +211,13 @@ export default {
     MMTTclear() {
       traceSource.clear();
       MMTT.init();
+      feedTimer = null;
     },
 
     // 点迹与航迹模拟渲染
     simulateMMTT(freq = 400, hisLength = 120, planeNumber = 15) {
       let i = 0;
-      let timer = setInterval(()=>{
+      feedTimer = setInterval(()=>{
         if (i < hisLength) {
           let data_raw = exampleDatas[i];
           let data = dataFilter.filterData(data_raw, planeNumber);
@@ -230,11 +235,42 @@ export default {
           i++;
         }
         else{
-          clearInterval(timer); // 终止timer
+          clearInterval(feedTimer); // 终止timer
           this.$emit('drawFinish');
         }
       }, freq)
     },
+
+    // 点迹与航迹实时渲染
+    rtimeMMTT(url = '/data.json', freq = 1000, planeNumber = 40) {
+      let data_raw;
+      feedTimer = setInterval(()=>{
+        // 获取      
+        axios.get(url, {
+          responseType: 'json',
+        })
+        .then(function (response) {
+          data_raw = response.data;
+          let data = dataFilter.filterData(data_raw, planeNumber);
+          MMTT.handleData(data, (cmd, traces, tempPoints, traceNumber, idxToDie) => {
+            if (cmd === 'die') {
+              removeTrace(idxToDie);
+            }
+            if (cmd === 'draw') {
+              for (let i in traces) {
+                let trace = traces[i];
+                drawTrace(trace, i);
+              }
+            }
+          });
+        })
+        .catch(function (error) {
+          console.log(`数据获取错误！`);
+          console.log(error);
+        });
+      }, freq);
+    },
+
 
     
   },

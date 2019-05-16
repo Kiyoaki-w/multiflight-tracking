@@ -5,7 +5,7 @@
 const axios = require("axios");
 const fs = require("fs");
 
-const record = (url, period = 60, freq = 1, path = './data.json') => {
+const record = (url, period = 60, freq = 1000, path = './data.json') => {
   let datas = [];
   let timer = 0;
   let fetchTimer = setInterval(()=>{
@@ -31,7 +31,7 @@ const record = (url, period = 60, freq = 1, path = './data.json') => {
       fs.writeSync(fd, JSON.stringify(datas));
       console.log(`文件写入完毕`);
     }
-  }, 1000);
+  }, freq);
 }
 
 record('http://219.224.161.159:28080/data.json', 180)

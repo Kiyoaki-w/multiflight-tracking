@@ -13,6 +13,7 @@ import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome';
 library.add(faLayerGroup);
 Vue.component('font-awesome-icon', FontAwesomeIcon);
 
+
 // 读取字体文件
 import './assets/fonts/loadMyFonts.css';
 
