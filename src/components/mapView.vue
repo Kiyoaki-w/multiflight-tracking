@@ -22,10 +22,9 @@ import VectorSource from 'ol/source/Vector.js';
 import XYZ from 'ol/source/XYZ';
 import WMTS from 'ol/source/WMTS';
 import WMTSTileGrid from 'ol/tilegrid/WMTS';
-import {Circle as CircleStyle, Fill, Stroke, Style, Text} from 'ol/style.js';
+import {/* Circle as CircleStyle, Fill, Text, */ Stroke, Style } from 'ol/style.js';
 import Feature from 'ol/Feature.js';
-import Point from 'ol/geom/Point.js';
-import { request } from 'http';
+// import Point from 'ol/geom/Point.js';
 import LineString from 'ol/geom/LineString';
 import axios from 'axios'
 
@@ -127,9 +126,10 @@ let traceLayer = new VectorLayer({
 let traceStyles = init_traceStyles();
 
 let feedTimer;
+let drawing;
 
 /*========================== 航迹显示相关 ==========================*/
-const drawTrace = (trace) => {
+const drawTrace = (trace, type) => {
   let points = trace.points;
   let traceStyle = traceStyles[trace.idx];
   let coors = [];
@@ -143,38 +143,38 @@ const drawTrace = (trace) => {
   });
   feature.setStyle(traceStyle);
   // 若有同ID的，是同一航迹的上次渲染，删除
-  let feature_old = traceSource.getFeatureById(trace.idx);
+  let feature_old = traceSource.getFeatureById(trace.idx + type);
   if (feature_old) {
     traceSource.removeFeature(feature_old);
   }
-  feature.setId(trace.idx);
+  feature.setId(trace.idx + type);
   traceSource.addFeature(feature);
 };
 
-const removeTrace = (idx) => {
-  let feature = traceSource.getFeatureById(idx);
+const removeTrace = (idx, type) => {
+  let feature = traceSource.getFeatureById(idx + type);
   traceSource.removeFeature(feature);
 };
 
-const drawPoint = (point) => {
-  let coor = Projection.transform(point, 'EPSG:4326', 'EPSG:3857');
-  let feature = new Feature({
-    geometry: new Point(coor),
-  });
-  let style = new Style({
-    image: new CircleStyle({
-      radius: 4,
-      stroke: new Stroke({
-        color: '#fff'
-      }),
-      fill: new Fill({
-        color: '#3399CC'
-      })
-    }),
-  });
-  feature.setStyle(style);
-  traceSource.addFeature(feature);
-};
+// const drawPoint = (point) => {
+//   let coor = Projection.transform(point, 'EPSG:4326', 'EPSG:3857');
+//   let feature = new Feature({
+//     geometry: new Point(coor),
+//   });
+//   let style = new Style({
+//     image: new CircleStyle({
+//       radius: 4,
+//       stroke: new Stroke({
+//         color: '#fff'
+//       }),
+//       fill: new Fill({
+//         color: '#3399CC'
+//       })
+//     }),
+//   });
+//   feature.setStyle(style);
+//   traceSource.addFeature(feature);
+// };
 
 export default {
 
@@ -199,6 +199,7 @@ export default {
     MMTTshow(config) {
       if (config.mode === 2) {
         // 实时数据渲染
+        drawing = true;
         this.rtimeMMTT('http://219.224.161.159:28080/data.json', 1000, config.planeNumber);
       }
       if (config.mode === 1) {
@@ -211,7 +212,10 @@ export default {
     MMTTclear() {
       traceSource.clear();
       MMTT.init();
+      dataFilter.init();
+      console.log('reinited')
       feedTimer = null;
+      // traceStyles = init_traceStyles();
     },
 
     // 点迹与航迹模拟渲染
@@ -223,12 +227,12 @@ export default {
           let data = dataFilter.filterData(data_raw, planeNumber);
           MMTT.handleData(data, (cmd, traces, tempPoints, traceNumber, idxToDie) => {
             if (cmd === 'die') {
-              removeTrace(idxToDie);
+              removeTrace(idxToDie, 'simulate');
             }
             if (cmd === 'draw') {
               for (let i in traces) {
                 let trace = traces[i];
-                drawTrace(trace, i);
+                drawTrace(trace, 'simulate');
               }
             }
           });
@@ -236,6 +240,7 @@ export default {
         }
         else{
           clearInterval(feedTimer); // 终止timer
+          feedTimer = null;
           this.$emit('drawFinish');
         }
       }, freq)
@@ -245,34 +250,42 @@ export default {
     rtimeMMTT(url = '/data.json', freq = 1000, planeNumber = 40) {
       let data_raw;
       feedTimer = setInterval(()=>{
-        // 获取      
-        axios.get(url, {
-          responseType: 'json',
-        })
-        .then(function (response) {
-          data_raw = response.data;
-          let data = dataFilter.filterData(data_raw, planeNumber);
-          MMTT.handleData(data, (cmd, traces, tempPoints, traceNumber, idxToDie) => {
-            if (cmd === 'die') {
-              removeTrace(idxToDie);
-            }
-            if (cmd === 'draw') {
-              for (let i in traces) {
-                let trace = traces[i];
-                drawTrace(trace, i);
+        if (drawing) {
+          // 获取      
+          axios.get(url, {
+            responseType: 'json',
+          })
+          .then(function (response) {
+            data_raw = response.data;
+            let data = dataFilter.filterData(data_raw, planeNumber);
+            MMTT.handleData(data, (cmd, traces, tempPoints, traceNumber, idxToDie) => {
+              if (cmd === 'die') {
+                removeTrace(idxToDie, 'rtime');
               }
-            }
+              if (cmd === 'draw') {
+                for (let i in traces) {
+                  let trace = traces[i];
+                  drawTrace(trace, 'rtime');
+                }
+              }
+            });
+          })
+          .catch(function (error) {
+            console.log(`数据获取错误！`);
+            console.log(error);
           });
-        })
-        .catch(function (error) {
-          console.log(`数据获取错误！`);
-          console.log(error);
-        });
+        }
       }, freq);
     },
 
+    rtimeStop() {
+      drawing = false;
+      clearInterval(feedTimer);
+      feedTimer = null;
+      this.$emit('drawFinish');
+    },
 
-    
+
   },
 
   mounted() {

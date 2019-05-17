@@ -29,20 +29,22 @@
             <p>数据演示</p>
           </div>
           <a-radio-group v-model="show.mode">
-            <a-radio :value="1">历史数据</a-radio>
-            <a-radio :value="2">实时数据</a-radio>
+            <a-radio :disabled="drawing" @click="MMTTclear" :value="1">历史数据</a-radio>
+            <a-radio :disabled="drawing" @click="MMTTclear" :value="2">实时数据</a-radio>
           </a-radio-group>
           <div style="padding-top:5px">
-            <span>历史长度：<a-input-number :disabled="show.mode === 2" size='small' :step='20' :min="30" :max="180" v-model="show.hisLength"/> 秒</span>
+            <span>历史长度：<a-input-number :disabled="show.mode === 2 || drawing" size='small' :step='20' :min="30" :max="180" v-model="show.hisLength"/> 秒</span>
             <br>
-            <span>刷新速度：<a-input-number :disabled="show.mode === 2" size='small' :step='100' :min="200" :max="2000" v-model="show.freq"/> 毫秒</span>
+            <span>刷新速度：<a-input-number :disabled="show.mode === 2 || drawing" size='small' :step='100' :min="200" :max="2000" v-model="show.freq"/> 毫秒</span>
             <br>
-            <span>飞机数量：<a-input-number size='small' :min="1" :max="40" v-model="show.planeNumber"/> 架</span>
+            <span>飞机数量：<a-input-number :disabled="drawing" size='small' :min="1" :max="40" v-model="show.planeNumber"/> 架</span>
           </div>
           <div style="padding-top:15px; text-align:end;">
             <a-button :disabled="drawing" size="small" type="primary" icon="caret-right" @click="MMTTshow">开始</a-button>
             <span style="padding:5px"> </span>
             <a-button :disabled="drawing" size="small" type="default" icon="delete" @click="MMTTclear">清除</a-button>
+            <span style="padding:5px"> </span>
+            <a-button :disabled="!(drawing & show.mode === 2)" size="small" type="danger" icon="close" @click="MMTTstop">停止</a-button>
           </div>
           
         </template>
@@ -86,6 +88,10 @@ export default {
     MMTTclear() {
       this.$refs.mapView.MMTTclear();
     },
+    MMTTstop() {
+      this.drawing = false;
+      this.$refs.mapView.rtimeStop();
+    }
   }
 }
 </script>

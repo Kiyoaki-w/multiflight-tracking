@@ -5,18 +5,19 @@
 
 function MMTT0() {
 
+  this.gate = {
+    lon: 0.03,
+    lat: 0.03,
+    height: 1000
+  };  
+
   this.init = () => {
     this.initFlag = true; // 标识是否为第一批数据
     this.traces = []; // 当前可靠航迹
     this.tempPoints = []; // 未匹配到任何航迹的暂存点迹
   
     this.traceNumber = 0; // 已生成的航迹数量
-  
-    this.gate = {
-      lon: 0.03,
-      lat: 0.03,
-      height: 1000
-    };  
+    
   };
   
   // 接收处理新到达数据
@@ -87,14 +88,14 @@ function MMTT0() {
         }
         else if (trace.notFreshed > 5) {
           // 超过N次未被更新的，消亡
-          console.log(`消亡！${this.traces[i]}`);
+          // console.log(`消亡！${this.traces[i]}`);
           callback('die', null, null, null, trace.idx);
           delete this.traces[i];
         }
         else if (trace.notFreshed > 1 && trace.notFreshed < 6) {
           // 未被更新，补点
           this.traces[i].points.push(getPredictPoint(this.traces[i]));
-          console.log(`补点！${this.traces[i]}`);
+          // console.log(`补点！${this.traces[i]}`);
         }
       }
       
