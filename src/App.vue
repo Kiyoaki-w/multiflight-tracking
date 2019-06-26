@@ -19,7 +19,7 @@
             <p>底图选择</p>
           </div>
           <a-radio-group @change="mapChange" v-model="selectedMap">
-            <a-radio :value="1">暗色底图</a-radio>
+            <a-radio title="校内网络环境下提供，为避免冲突已禁用" disabled='true' :value="1">暗色底图</a-radio> <!-- 暗色地图需要有架设在校内的地图服务器支持，出于通用性考虑已禁用 -->
             <a-radio :value="2">Google地图</a-radio>
           </a-radio-group>
 
@@ -30,7 +30,7 @@
           </div>
           <a-radio-group v-model="show.mode">
             <a-radio :disabled="drawing" @click="MMTTclear" :value="1">历史数据</a-radio>
-            <a-radio :disabled="drawing" @click="MMTTclear" :value="2">实时数据</a-radio>
+            <a-radio title="实时数据需在校内网络环境下接收！" :disabled="drawing" @click="MMTTclear" :value="2">实时数据</a-radio>
           </a-radio-group>
           <div style="padding-top:5px">
             <span>历史长度：<a-input-number :disabled="show.mode === 2 || drawing" size='small' :step='20' :min="30" :max="180" v-model="show.hisLength"/> 秒</span>
@@ -65,7 +65,7 @@ export default {
   },
   data () {
     return {
-      selectedMap: 1, // 底图风格
+      selectedMap: 2, // 底图风格
       show: {
         mode: 1,
         hisLength: 180,

@@ -289,12 +289,12 @@ export default {
   },
 
   mounted() {
-    // const __this = this;
-
-    wmtsLayer = new TileLayer({
-      title: "WMTS",
-      source: constructSource()
-    });
+    
+    // 暗色地图需要有架设在校内的地图服务器支持，出于通用性考虑已注释
+    // wmtsLayer = new TileLayer({
+    //   title: "WMTS",
+    //   source: constructSource()
+    // });
 
     googleTerLayer = new TileLayer({
       source: new XYZ({
@@ -318,11 +318,8 @@ export default {
       view: myView
     });
     let layersArray = map.getLayers();
-    layersArray.insertAt(1, wmtsLayer);
+    layersArray.insertAt(1, googleTerLayer);
     layersArray.insertAt(4, traceLayer);
-
-    // drawPoint([116.4,39.9]);
-    // this.simulateMMTT()
   },
 }
 </script>
